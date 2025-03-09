@@ -88,7 +88,7 @@ async function swap(amount: number) {
   await new Promise((resolve) => setTimeout(resolve, 1500));
   return {
     success: true,
-    txHash: "0x" + Math.random().toString(16).substring(2, 10) + "...",
+    txHash: "0x" + Math.random().toString(16).substring(2, 42),
   };
 }
 
