@@ -95,6 +95,9 @@ async function swap(amount: number) {
 function Index() {
   const [swapAmount, setSwapAmount] = useState<string>("1");
   const [debouncedAmount, setDebouncedAmount] = useState<string>(swapAmount);
+  const [direction, setDirection] = useState<"ETH_TO_USDC" | "USDC_TO_ETH">(
+    "ETH_TO_USDC"
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -131,11 +134,18 @@ function Index() {
     if (!poolData) return { estimate: 0, fee: 0 };
 
     const amount = parseFloat(debouncedAmount) || 0;
-    const estimate = amount * poolData.token0Price;
-    const fee = estimate * poolData.fee;
 
-    return { estimate, fee };
-  }, [debouncedAmount, poolData]);
+    // Calculate based on direction
+    if (direction === "ETH_TO_USDC") {
+      const estimate = amount * poolData.token0Price;
+      const fee = estimate * poolData.fee;
+      return { estimate, fee };
+    } else {
+      const estimate = amount * poolData.token1Price;
+      const fee = estimate * poolData.fee;
+      return { estimate, fee };
+    }
+  }, [debouncedAmount, poolData, direction]);
 
   const { estimate: swapEstimate, fee: swapFee } = calculateSwapEstimate;
 
@@ -144,10 +154,50 @@ function Index() {
     executeSwap(parseFloat(swapAmount));
   };
 
+  const toggleDirection = () => {
+    setDirection((prev) =>
+      prev === "ETH_TO_USDC" ? "USDC_TO_ETH" : "ETH_TO_USDC"
+    );
+    if (direction === "ETH_TO_USDC") {
+      setSwapAmount("1000");
+    } else {
+      setSwapAmount("1");
+    }
+  };
+
+  // Get token names based on direction
+  const fromToken = direction === "ETH_TO_USDC" ? "ETH" : "USDC";
+  const toToken = direction === "ETH_TO_USDC" ? "USDC" : "ETH";
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Swap ETH to USDC</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">
+            Swap {fromToken} to {toToken}
+          </h2>
+          <button
+            onClick={toggleDirection}
+            className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSwapping}
+            title="Switch direction"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+              />
+            </svg>
+          </button>
+        </div>
 
         {isLoadingPool ? (
           <div className="text-center py-4">Loading pool data...</div>
@@ -159,7 +209,7 @@ function Index() {
           <form onSubmit={handleSwap}>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">
-                From (ETH)
+                From ({fromToken})
               </label>
               <input
                 type="number"
@@ -175,7 +225,7 @@ function Index() {
 
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">
-                To (USDC)
+                To ({toToken})
               </label>
               <div className="w-full p-2 border rounded bg-gray-50">
                 {swapEstimate.toFixed(2)}
@@ -185,12 +235,16 @@ function Index() {
             <div className="mb-4 text-sm">
               <div className="flex justify-between">
                 <span>Exchange Rate:</span>
-                <span>1 ETH = {poolData?.token0Price} USDC</span>
+                <span>
+                  {direction === "ETH_TO_USDC"
+                    ? `1 ETH = ${poolData?.token0Price} USDC`
+                    : `1 USDC = ${poolData?.token1Price} ETH`}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Fee:</span>
                 <span>
-                  {swapFee.toFixed(2)} USDC (
+                  {swapFee.toFixed(2)} {toToken} (
                   {((poolData?.fee || 0) * 100).toFixed(2)}%)
                 </span>
               </div>
