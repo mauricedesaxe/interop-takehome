@@ -7,14 +7,74 @@ export const Route = createFileRoute("/")({
 });
 
 /**
- * Mock for the function that fetches the pool data from the Subgraph
+ * Fetches pool data from the Uniswap V3 Subgraph
  */
 async function fetchPoolData() {
-  await new Promise((resolve) => setTimeout(resolve, 800));
+  // I've identified this pool as the highest volume USDC-WETH pool on Arbitrum One at the time of writing
+  const POOL_ID = "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640";
+
+  const query = `
+    {
+      pool(id: "${POOL_ID}") {
+        token0 {
+          symbol
+        }
+        token1 {
+          symbol
+        }
+        token0Price
+        token1Price
+        feeTier
+        volumeUSD
+      }
+    }
+  `;
+
+  const API_KEY = import.meta.env.VITE_THE_GRAPH_API_KEY;
+  const SUBGRAPH_ID = "5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV";
+  if (!API_KEY) {
+    console.error(
+      "Missing Graph API key. Please set VITE_THE_GRAPH_API_KEY in your environment variables."
+    );
+    throw new Error("API key not configured");
+  }
+
+  const response = await fetch(
+    `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (data.errors) {
+    console.error("GraphQL errors:", data.errors);
+    throw new Error(
+      "Failed to fetch pool data: " +
+        (data.errors[0]?.message || "Unknown error")
+    );
+  }
+
+  if (!data.data || !data.data.pool) {
+    throw new Error("Pool not found or invalid response format");
+  }
+
+  const poolData = data.data.pool;
+
+  const token0Price = parseFloat(poolData.token0Price);
+  const token1Price = parseFloat(poolData.token1Price);
+  const feeDecimal = parseInt(poolData.feeTier) / 1000000;
+
   return {
-    token0Price: 2500,
-    fee: 0.003,
-    volumeUSD: 15_000_000,
+    token0Price,
+    token1Price,
+    fee: feeDecimal,
+    volumeUSD: parseFloat(poolData.volumeUSD),
   };
 }
 
