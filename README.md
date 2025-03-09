@@ -96,3 +96,11 @@ Here I won't because:
 - we don't need it to make API calls
 - it's not a specified requirement in the PDF
 - we're time constrained
+
+## Resources
+
+A lot of the resources in the PDF are broken links, so I collected the following:
+
+[Arbitrum Uniswap V3 Subgraph](https://thegraph.com/explorer/subgraphs/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV?view=Query&chain=arbitrum-one): 
+I haven't worked with The Graph recently, but it seems a lot of things have changed. Ethereum is deprecated. Uniswap seems to expect you to build your own subgraphs vs the company providing them (like we did at Toucan back in the day). I could've deployed my own subgraph, but I didn't want to spend time on that. Calling the arbitrum-one subgraph was the next best thing that still shows I can query the data.
+
