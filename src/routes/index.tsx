@@ -220,7 +220,14 @@ function Index() {
           <form onSubmit={handleSwap}>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">
-                From ({fromToken})
+                <div className="flex items-center">
+                  <img
+                    src={fromToken === "USDC" ? "/usdc.png" : "/ethereum.svg"}
+                    alt={fromToken}
+                    className="w-5 h-5 mr-2"
+                  />
+                  From ({fromToken})
+                </div>
               </label>
               <input
                 type="number"
@@ -236,7 +243,14 @@ function Index() {
 
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">
-                To ({toToken})
+                <div className="flex items-center">
+                  <img
+                    src={toToken === "USDC" ? "/usdc.png" : "/ethereum.svg"}
+                    alt={toToken}
+                    className="w-5 h-5 mr-2"
+                  />
+                  To ({toToken})
+                </div>
               </label>
               <div className="w-full p-2 border rounded bg-gray-50">
                 {swapEstimate.toFixed(2)}
