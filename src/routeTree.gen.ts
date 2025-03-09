@@ -11,14 +11,21 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AboutImport } from './routes/about'
+import { Route as TransactionsImport } from './routes/transactions'
+import { Route as BridgeImport } from './routes/bridge'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
 
-const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
+const TransactionsRoute = TransactionsImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const BridgeRoute = BridgeImport.update({
+  id: '/bridge',
+  path: '/bridge',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -39,11 +46,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
+    '/bridge': {
+      id: '/bridge'
+      path: '/bridge'
+      fullPath: '/bridge'
+      preLoaderRoute: typeof BridgeImport
+      parentRoute: typeof rootRoute
+    }
+    '/transactions': {
+      id: '/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof TransactionsImport
       parentRoute: typeof rootRoute
     }
   }
@@ -53,37 +67,42 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/bridge': typeof BridgeRoute
+  '/transactions': typeof TransactionsRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/bridge': typeof BridgeRoute
+  '/transactions': typeof TransactionsRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/bridge': typeof BridgeRoute
+  '/transactions': typeof TransactionsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths: '/' | '/bridge' | '/transactions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to: '/' | '/bridge' | '/transactions'
+  id: '__root__' | '/' | '/bridge' | '/transactions'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  BridgeRoute: typeof BridgeRoute
+  TransactionsRoute: typeof TransactionsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  BridgeRoute: BridgeRoute,
+  TransactionsRoute: TransactionsRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,14 +116,18 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/bridge",
+        "/transactions"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/about": {
-      "filePath": "about.tsx"
+    "/bridge": {
+      "filePath": "bridge.tsx"
+    },
+    "/transactions": {
+      "filePath": "transactions.tsx"
     }
   }
 }
