@@ -105,93 +105,186 @@ function Bridge() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Bridge USDC</h2>
+    <div className="max-w-5xl mx-auto p-4 bg-slate-50 min-h-screen">
+      <div className="bg-white rounded-xl shadow-lg p-8 border border-slate-100 transition-all duration-300 hover:shadow-xl">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-semibold text-slate-800">Bridge USDC</h2>
+          <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">
+            Ethereum → Polygon
+          </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            From (Ethereum)
-          </label>
-          <div className="flex justify-between items-center w-full p-2 border rounded">
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-2/3 bg-transparent focus:outline-none"
-              placeholder="0.0"
-              min="0.01"
-              step="0.01"
-            />
-            <div className="flex items-center space-x-2">
-              <img src="/ethereum.svg" alt="Ethereum" className="w-6 h-6" />
-              <span className="font-medium">USDC</span>
+        <div className="md:flex md:gap-10">
+          {/* Left panel - Bridge inputs */}
+          <div className="md:w-3/5">
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2 text-slate-700">
+                <div className="flex items-center">
+                  <div className="bg-slate-100 p-2 rounded-full mr-3">
+                    <img
+                      src="/ethereum.svg"
+                      alt="Ethereum"
+                      className="w-7 h-7"
+                    />
+                  </div>
+                  From (Ethereum)
+                </div>
+              </label>
+              <div className="flex justify-between items-center w-full p-4 border border-slate-200 rounded-lg bg-slate-50 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all">
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-2/3 bg-transparent focus:outline-none text-lg"
+                  placeholder="0.0"
+                  min="0.01"
+                  step="0.01"
+                  disabled={bridgeInProgress}
+                />
+                <div className="flex items-center space-x-2 bg-white py-2 px-3 rounded-lg shadow-sm">
+                  <img src="/usdc.png" alt="USDC" className="w-6 h-6" />
+                  <span className="font-medium text-slate-800">USDC</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-center my-6 relative">
+              <div className="absolute w-full border-t border-slate-200 top-1/2 -translate-y-1/2"></div>
+              <div className="bg-white p-2 rounded-full z-10 shadow-sm border border-slate-100">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6 text-indigo-600"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2 text-slate-700">
+                <div className="flex items-center">
+                  <div className="bg-slate-100 p-2 rounded-full mr-3">
+                    <img src="/polygon.svg" alt="Polygon" className="w-7 h-7" />
+                  </div>
+                  To (Polygon)
+                </div>
+              </label>
+              <div className="w-full p-4 border border-slate-200 rounded-lg bg-slate-50 flex justify-between items-center shadow-sm text-lg">
+                <span className="text-slate-700">{amount || "0.0"}</span>
+                <div className="flex items-center space-x-2 bg-white py-2 px-3 rounded-lg shadow-sm">
+                  <img src="/usdc.png" alt="USDC" className="w-6 h-6" />
+                  <span className="font-medium text-slate-800">USDC</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleBridge}
+              className="w-full bg-indigo-600 text-white py-4 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-300 text-lg font-medium transition-all hover:shadow-md hover:scale-[1.01] active:scale-[0.99] disabled:hover:scale-100 cursor-pointer"
+              disabled={
+                isEstimating ||
+                bridgeInProgress ||
+                !amount ||
+                parseFloat(amount) <= 0
+              }
+            >
+              {bridgeInProgress ? (
+                <span className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Bridging
+                </span>
+              ) : isEstimating ? (
+                "Loading..."
+              ) : (
+                "Bridge USDC"
+              )}
+            </button>
+          </div>
+
+          {/* Right panel - Bridge details */}
+          <div className="md:w-2/5 mt-8 md:mt-0 p-6 bg-white rounded-lg shadow-md border border-slate-100">
+            <h3 className="font-medium mb-4 text-slate-800 text-lg">
+              Bridge Details
+            </h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                <span className="text-slate-600">Bridge Fee:</span>
+                <span className="font-medium text-slate-800">
+                  {isEstimating ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin mr-2 h-4 w-4 text-indigo-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Estimating...
+                    </span>
+                  ) : bridgeEstimate ? (
+                    `${bridgeEstimate.fee} ETH`
+                  ) : (
+                    "0.00 ETH"
+                  )}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                <span className="text-slate-600">Data Age:</span>
+                <span className="font-medium text-slate-800">
+                  {bridgeEstimate
+                    ? getTimeSince(bridgeEstimate.timestampUTC, currentTime)
+                    : "just now"}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 text-center">
+              <div className="text-sm text-slate-500 flex items-center justify-center">
+                Powered by Axelar Network
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="flex justify-center my-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6 text-gray-400"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">To (Polygon)</label>
-          <div className="w-full p-2 border rounded bg-gray-50 flex justify-between items-center">
-            <span>{amount || "0.0"}</span>
-            <div className="flex items-center space-x-2">
-              <img src="/polygon.svg" alt="Polygon" className="w-6 h-6" />
-              <span className="font-medium">USDC</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-4 text-sm">
-          <div className="flex justify-between">
-            <span>Bridge Fee:</span>
-            <span>
-              {isEstimating
-                ? "Estimating fee..."
-                : bridgeEstimate
-                  ? `${bridgeEstimate.fee} ETH (${getTimeSince(bridgeEstimate.timestampUTC, currentTime)})`
-                  : "0.00 ETH"}
-            </span>
-          </div>
-        </div>
-
-        <button
-          onClick={handleBridge}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
-          disabled={
-            isEstimating ||
-            bridgeInProgress ||
-            !amount ||
-            parseFloat(amount) <= 0
-          }
-        >
-          {bridgeInProgress
-            ? "Bridging..."
-            : isEstimating
-              ? "Loading..."
-              : "Bridge USDC"}
-        </button>
-
-        <div className="mt-3 text-sm text-gray-500 text-center">
-          Powered by Axelar Network
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
   component: () => (
-    <>
+    <div className="bg-slate-50 min-h-screen">
       <div className="p-2 flex gap-2">
         <Link to="/" className="[&.active]:font-bold">
           Swap
@@ -16,6 +16,6 @@ export const Route = createRootRoute({
       </div>
       <hr />
       <Outlet />
-    </>
+    </div>
   ),
 });

@@ -182,14 +182,14 @@ function Index() {
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100 transition-all duration-300 hover:shadow-xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">
+      <div className="bg-white rounded-xl shadow-lg p-8 border border-slate-100 transition-all duration-300 hover:shadow-xl">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-semibold text-slate-800">
             Swap {fromToken} to {toToken}
           </h2>
           <button
             onClick={toggleDirection}
-            className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="p-3 bg-slate-100 rounded-full hover:bg-slate-200 hover:scale-105 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSwapping}
             title="Switch direction"
           >
@@ -199,7 +199,7 @@ function Index() {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="size-6"
+              className="size-6 text-indigo-700"
             >
               <path
                 strokeLinecap="round"
@@ -211,26 +211,33 @@ function Index() {
         </div>
 
         {isLoadingPool ? (
-          <div className="text-center py-4">Loading pool data...</div>
+          <div className="text-center py-8 text-slate-600">
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="h-8 w-32 bg-slate-200 rounded mb-4"></div>
+              <div className="h-6 w-48 bg-slate-200 rounded"></div>
+            </div>
+          </div>
         ) : poolError ? (
-          <div className="text-center py-4 text-red-500">
+          <div className="text-center py-6 text-red-500 bg-red-50 rounded-lg">
             Error loading pool data. Please try again.
           </div>
         ) : (
           <form onSubmit={handleSwap}>
-            <div className="md:flex md:gap-8">
+            <div className="md:flex md:gap-10">
               {/* Left panel - Swap inputs */}
               <div className="md:w-3/5">
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">
+                <div className="mb-6">
+                  <label className="block text-sm font-medium mb-2 text-slate-700">
                     <div className="flex items-center">
-                      <img
-                        src={
-                          fromToken === "USDC" ? "/usdc.png" : "/ethereum.svg"
-                        }
-                        alt={fromToken}
-                        className="w-6 h-6 mr-2 my-2"
-                      />
+                      <div className="bg-slate-100 p-2 rounded-full mr-3">
+                        <img
+                          src={
+                            fromToken === "USDC" ? "/usdc.png" : "/ethereum.svg"
+                          }
+                          alt={fromToken}
+                          className="w-7 h-7"
+                        />
+                      </div>
                       From ({fromToken})
                     </div>
                   </label>
@@ -238,7 +245,7 @@ function Index() {
                     type="number"
                     value={swapAmount}
                     onChange={(e) => setSwapAmount(e.target.value)}
-                    className="w-full p-3 border rounded text-lg"
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg text-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
                     min="0.01"
                     step="0.01"
                     required
@@ -246,73 +253,135 @@ function Index() {
                   />
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">
+                <div className="mb-6">
+                  <label className="block text-sm font-medium mb-2 text-slate-700">
                     <div className="flex items-center">
-                      <img
-                        src={toToken === "USDC" ? "/usdc.png" : "/ethereum.svg"}
-                        alt={toToken}
-                        className="w-6 h-6 mr-2 my-2"
-                      />
+                      <div className="bg-slate-100 p-2 rounded-full mr-3">
+                        <img
+                          src={
+                            toToken === "USDC" ? "/usdc.png" : "/ethereum.svg"
+                          }
+                          alt={toToken}
+                          className="w-7 h-7"
+                        />
+                      </div>
                       To ({toToken})
                     </div>
                   </label>
-                  <div className="w-full p-3 border rounded bg-gray-50 text-lg">
+                  <div className="w-full p-4 border border-slate-200 rounded-lg bg-slate-50 text-lg shadow-sm text-slate-700">
                     {swapEstimate.toFixed(2)}
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 disabled:bg-blue-300 text-lg font-medium transition-colors"
+                  className="w-full bg-indigo-600 text-white py-4 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-300 text-lg cursor-pointer font-medium transition-all hover:shadow-md hover:scale-[1.01] active:scale-[0.99] disabled:hover:scale-100"
                   disabled={isSwapping || parseFloat(swapAmount) <= 0}
                 >
-                  {isSwapping ? "Processing..." : "Swap"}
+                  {isSwapping ? (
+                    <span className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Processing
+                    </span>
+                  ) : (
+                    "Swap"
+                  )}
                 </button>
 
                 {swapSuccess && (
-                  <div className="mt-3 p-2 bg-green-100 text-green-800 rounded text-center">
-                    Swap successful!
+                  <div className="mt-4 p-3 bg-green-50 text-green-800 rounded-lg text-center border border-green-100 shadow-sm">
+                    <div className="flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      Swap successful!
+                    </div>
                   </div>
                 )}
 
                 {swapError && (
-                  <div className="mt-3 p-2 bg-red-100 text-red-800 rounded text-center">
-                    Error: Failed to complete swap. Please try again.
+                  <div className="mt-4 p-3 bg-red-50 text-red-800 rounded-lg text-center border border-red-100 shadow-sm">
+                    <div className="flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                      Error: Failed to complete swap. Please try again.
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* Right panel - Transaction details */}
-              <div className="md:w-2/5 mt-6 md:mt-0 p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-medium mb-3 text-gray-700">
+              <div className="md:w-2/5 mt-8 md:mt-0 p-6 bg-white rounded-lg shadow-md border border-slate-100">
+                <h3 className="font-medium mb-4 text-slate-800 text-lg">
                   Transaction Details
                 </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Exchange Rate:</span>
-                    <span className="font-medium">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                    <span className="text-slate-600">Exchange Rate:</span>
+                    <span className="font-medium text-slate-800">
                       {direction === "ETH_TO_USDC"
                         ? `1 ETH = ${poolData?.token0Price.toFixed(2)} USDC`
                         : `1 USDC = ${poolData?.token1Price.toFixed(6)} ETH`}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Fee:</span>
-                    <span className="font-medium">
+                  <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                    <span className="text-slate-600">Fee:</span>
+                    <span className="font-medium text-slate-800">
                       {swapFee.toFixed(2)} {toToken} (
                       {((poolData?.fee || 0) * 100).toFixed(2)}%)
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">24h Volume:</span>
-                    <span className="font-medium">
+                  <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                    <span className="text-slate-600">24h Volume:</span>
+                    <span className="font-medium text-slate-800">
                       ${((poolData?.volumeUSD || 0) / 1000000).toFixed(1)}M
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Data Age:</span>
-                    <span className="font-medium">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Data Age:</span>
+                    <span className="font-medium text-slate-800">
                       {poolData?.timestampUTC
                         ? getTimeSince(poolData.timestampUTC, currentTime)
                         : "just now"}
