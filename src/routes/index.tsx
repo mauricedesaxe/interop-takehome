@@ -111,6 +111,7 @@ function Index() {
     queryKey: ["poolData"],
     queryFn: fetchPoolData,
     staleTime: 60_000,
+    refetchInterval: 60_000,
   });
 
   const {
