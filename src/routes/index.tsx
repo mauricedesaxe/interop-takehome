@@ -181,15 +181,15 @@ function Index() {
   const toToken = direction === "ETH_TO_USDC" ? "USDC" : "ETH";
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
+    <div className="max-w-5xl mx-auto p-4">
+      <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100 transition-all duration-300 hover:shadow-xl">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold">
             Swap {fromToken} to {toToken}
           </h2>
           <button
             onClick={toggleDirection}
-            className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={isSwapping}
             title="Switch direction"
           >
@@ -218,96 +218,109 @@ function Index() {
           </div>
         ) : (
           <form onSubmit={handleSwap}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                <div className="flex items-center">
-                  <img
-                    src={fromToken === "USDC" ? "/usdc.png" : "/ethereum.svg"}
-                    alt={fromToken}
-                    className="w-5 h-5 mr-2"
+            <div className="md:flex md:gap-8">
+              {/* Left panel - Swap inputs */}
+              <div className="md:w-3/5">
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">
+                    <div className="flex items-center">
+                      <img
+                        src={
+                          fromToken === "USDC" ? "/usdc.png" : "/ethereum.svg"
+                        }
+                        alt={fromToken}
+                        className="w-6 h-6 mr-2 my-2"
+                      />
+                      From ({fromToken})
+                    </div>
+                  </label>
+                  <input
+                    type="number"
+                    value={swapAmount}
+                    onChange={(e) => setSwapAmount(e.target.value)}
+                    className="w-full p-3 border rounded text-lg"
+                    min="0.01"
+                    step="0.01"
+                    required
+                    disabled={isSwapping}
                   />
-                  From ({fromToken})
                 </div>
-              </label>
-              <input
-                type="number"
-                value={swapAmount}
-                onChange={(e) => setSwapAmount(e.target.value)}
-                className="w-full p-2 border rounded"
-                min="0.01"
-                step="0.01"
-                required
-                disabled={isSwapping}
-              />
-            </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                <div className="flex items-center">
-                  <img
-                    src={toToken === "USDC" ? "/usdc.png" : "/ethereum.svg"}
-                    alt={toToken}
-                    className="w-5 h-5 mr-2"
-                  />
-                  To ({toToken})
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">
+                    <div className="flex items-center">
+                      <img
+                        src={toToken === "USDC" ? "/usdc.png" : "/ethereum.svg"}
+                        alt={toToken}
+                        className="w-6 h-6 mr-2 my-2"
+                      />
+                      To ({toToken})
+                    </div>
+                  </label>
+                  <div className="w-full p-3 border rounded bg-gray-50 text-lg">
+                    {swapEstimate.toFixed(2)}
+                  </div>
                 </div>
-              </label>
-              <div className="w-full p-2 border rounded bg-gray-50">
-                {swapEstimate.toFixed(2)}
+
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 disabled:bg-blue-300 text-lg font-medium transition-colors"
+                  disabled={isSwapping || parseFloat(swapAmount) <= 0}
+                >
+                  {isSwapping ? "Processing..." : "Swap"}
+                </button>
+
+                {swapSuccess && (
+                  <div className="mt-3 p-2 bg-green-100 text-green-800 rounded text-center">
+                    Swap successful!
+                  </div>
+                )}
+
+                {swapError && (
+                  <div className="mt-3 p-2 bg-red-100 text-red-800 rounded text-center">
+                    Error: Failed to complete swap. Please try again.
+                  </div>
+                )}
+              </div>
+
+              {/* Right panel - Transaction details */}
+              <div className="md:w-2/5 mt-6 md:mt-0 p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-medium mb-3 text-gray-700">
+                  Transaction Details
+                </h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Exchange Rate:</span>
+                    <span className="font-medium">
+                      {direction === "ETH_TO_USDC"
+                        ? `1 ETH = ${poolData?.token0Price.toFixed(2)} USDC`
+                        : `1 USDC = ${poolData?.token1Price.toFixed(6)} ETH`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Fee:</span>
+                    <span className="font-medium">
+                      {swapFee.toFixed(2)} {toToken} (
+                      {((poolData?.fee || 0) * 100).toFixed(2)}%)
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">24h Volume:</span>
+                    <span className="font-medium">
+                      ${((poolData?.volumeUSD || 0) / 1000000).toFixed(1)}M
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Data Age:</span>
+                    <span className="font-medium">
+                      {poolData?.timestampUTC
+                        ? getTimeSince(poolData.timestampUTC, currentTime)
+                        : "just now"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div className="mb-4 text-sm">
-              <div className="flex justify-between">
-                <span>Exchange Rate:</span>
-                <span>
-                  {direction === "ETH_TO_USDC"
-                    ? `1 ETH = ${poolData?.token0Price} USDC`
-                    : `1 USDC = ${poolData?.token1Price} ETH`}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Fee:</span>
-                <span>
-                  {swapFee.toFixed(2)} {toToken} (
-                  {((poolData?.fee || 0) * 100).toFixed(2)}%)
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>24h Volume:</span>
-                <span>
-                  ${((poolData?.volumeUSD || 0) / 1000000).toFixed(1)}M
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Data Age:</span>
-                <span>
-                  {poolData?.timestampUTC
-                    ? getTimeSince(poolData.timestampUTC, currentTime)
-                    : "just now"}
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
-              disabled={isSwapping || parseFloat(swapAmount) <= 0}
-            >
-              {isSwapping ? "Processing..." : "Swap"}
-            </button>
-
-            {swapSuccess && (
-              <div className="mt-3 p-2 bg-green-100 text-green-800 rounded text-center">
-                Swap successful!
-              </div>
-            )}
-
-            {swapError && (
-              <div className="mt-3 p-2 bg-red-100 text-red-800 rounded text-center">
-                Error: Failed to complete swap. Please try again.
-              </div>
-            )}
           </form>
         )}
       </div>
