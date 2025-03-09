@@ -1,4 +1,5 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { Toaster } from "react-hot-toast";
 
 export const Route = createRootRoute({
   component: () => (
@@ -16,6 +17,13 @@ export const Route = createRootRoute({
       </div>
       <hr />
       <Outlet />
+
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 5000,
+        }}
+      />
     </div>
   ),
 });

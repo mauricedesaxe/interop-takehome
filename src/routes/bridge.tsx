@@ -7,6 +7,7 @@ import {
   Environment,
 } from "@axelar-network/axelarjs-sdk";
 import { getTimeSince } from "../utils";
+import toast from "react-hot-toast";
 
 export const Route = createFileRoute("/bridge")({
   component: Bridge,
@@ -90,10 +91,14 @@ function Bridge() {
   const { mutate: executeBridge, isPending: bridgeInProgress } = useMutation({
     mutationFn: (bridgeAmount: number) => bridge(bridgeAmount),
     onSuccess: (data) => {
-      alert(`Bridge completed successfully! Transaction hash: ${data.txHash}`);
+      toast.success(
+        `Bridge completed successfully! Transaction: ${data.txHash.substring(0, 16)}...`
+      );
     },
     onError: (error) => {
-      alert(`Bridge failed: ${error}`);
+      toast.error(
+        `Bridge failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     },
   });
 

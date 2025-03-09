@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getTimeSince } from "../utils";
+import toast from "react-hot-toast";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -128,16 +129,19 @@ function Index() {
     refetchInterval: 60_000,
   });
 
-  const {
-    mutate: executeSwap,
-    isPending: isSwapping,
-    isSuccess: swapSuccess,
-    error: swapError,
-  } = useMutation({
+  const { mutate: executeSwap, isPending: isSwapping } = useMutation({
     mutationFn: (amount: number) => swap(amount),
-    onSuccess: () => {
-      // Could invalidate queries or update cache here if needed
-      // For example: queryClient.invalidateQueries({ queryKey: ['poolData'] })
+    onSuccess: (data) => {
+      // Show success toast
+      toast.success(
+        `Swap successful! Transaction: ${data.txHash.substring(0, 16)}...`
+      );
+    },
+    onError: (error) => {
+      // Show error toast
+      toast.error(
+        `Swap failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     },
   });
 
@@ -312,50 +316,6 @@ function Index() {
                     "Swap"
                   )}
                 </button>
-
-                {swapSuccess && (
-                  <div className="mt-4 p-3 bg-green-50 text-green-800 rounded-lg text-center border border-green-100 shadow-sm">
-                    <div className="flex items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      Swap successful!
-                    </div>
-                  </div>
-                )}
-
-                {swapError && (
-                  <div className="mt-4 p-3 bg-red-50 text-red-800 rounded-lg text-center border border-red-100 shadow-sm">
-                    <div className="flex items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                      Error: Failed to complete swap. Please try again.
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Right panel - Transaction details */}
