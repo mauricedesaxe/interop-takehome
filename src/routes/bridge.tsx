@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   AxelarQueryAPI,
   CHAINS,
   Environment,
 } from "@axelar-network/axelarjs-sdk";
+import { getTimeSince } from "../utils";
 
 export const Route = createFileRoute("/bridge")({
   component: Bridge,
@@ -22,7 +23,10 @@ const axelarQuery = new AxelarQueryAPI({
 /**
  * Fetches the bridge fee estimate from Axelar
  */
-async function estimateBridgeFee(): Promise<{ fee: string }> {
+async function estimateBridgeFee(): Promise<{
+  fee: string;
+  timestampUTC: string;
+}> {
   const gasFee = await axelarQuery.estimateGasFee(
     CHAINS.MAINNET.ETHEREUM,
     CHAINS.MAINNET.POLYGON,
@@ -33,6 +37,7 @@ async function estimateBridgeFee(): Promise<{ fee: string }> {
     const feeInEth = parseFloat(gasFee) / 1e18;
     return {
       fee: feeInEth.toFixed(6),
+      timestampUTC: new Date().toUTCString(),
     };
   } else {
     // For the sake of the take-home I am expecting the SDK to return a string
@@ -60,10 +65,23 @@ async function bridge(
 
 function Bridge() {
   const [amount, setAmount] = useState<string>("100");
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
+
+  // Update the current time every second to show accurate data age
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const { data: bridgeEstimate, isLoading: isEstimating } = useQuery({
     queryKey: ["bridgeFee", amount],
-    queryFn: () => estimateBridgeFee(),
+    queryFn: async () => {
+      const result = await estimateBridgeFee();
+      return result;
+    },
     enabled: !!amount && parseFloat(amount) > 0,
     staleTime: 30_000,
     refetchInterval: 30_000,
@@ -148,7 +166,9 @@ function Bridge() {
             <span>
               {isEstimating
                 ? "Estimating fee..."
-                : `${bridgeEstimate?.fee || "0.00"} ETH`}
+                : bridgeEstimate
+                  ? `${bridgeEstimate.fee} ETH (${getTimeSince(bridgeEstimate.timestampUTC, currentTime)})`
+                  : "0.00 ETH"}
             </span>
           </div>
         </div>

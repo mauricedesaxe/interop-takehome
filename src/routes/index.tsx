@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { getTimeSince } from "../utils";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -75,6 +76,7 @@ async function fetchPoolData() {
     token1Price,
     fee: feeDecimal,
     volumeUSD: parseFloat(poolData.volumeUSD),
+    timestampUTC: new Date().toUTCString(),
   };
 }
 
@@ -98,6 +100,7 @@ function Index() {
   const [direction, setDirection] = useState<"ETH_TO_USDC" | "USDC_TO_ETH">(
     "ETH_TO_USDC"
   );
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -105,6 +108,14 @@ function Index() {
     }, 200); // debounce delay should be enough to not calculate every keystroke, but still be responsive (read Doherty Threshold)
     return () => clearTimeout(timer);
   }, [swapAmount]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const {
     data: poolData,
@@ -252,6 +263,14 @@ function Index() {
                 <span>24h Volume:</span>
                 <span>
                   ${((poolData?.volumeUSD || 0) / 1000000).toFixed(1)}M
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Data Age:</span>
+                <span>
+                  {poolData?.timestampUTC
+                    ? getTimeSince(poolData.timestampUTC, currentTime)
+                    : "just now"}
                 </span>
               </div>
             </div>
