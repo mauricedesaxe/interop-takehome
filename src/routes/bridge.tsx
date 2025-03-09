@@ -108,7 +108,7 @@ function Bridge() {
               step="0.01"
             />
             <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
+              <img src="/ethereum.svg" alt="Ethereum" className="w-6 h-6" />
               <span className="font-medium">USDC</span>
             </div>
           </div>
@@ -136,7 +136,7 @@ function Bridge() {
           <div className="w-full p-2 border rounded bg-gray-50 flex justify-between items-center">
             <span>{amount || "0.0"}</span>
             <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-purple-500 rounded-full"></div>
+              <img src="/polygon.svg" alt="Polygon" className="w-6 h-6" />
               <span className="font-medium">USDC</span>
             </div>
           </div>
