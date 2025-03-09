@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
@@ -94,6 +94,14 @@ async function swap(amount: number) {
 
 function Index() {
   const [swapAmount, setSwapAmount] = useState<string>("1");
+  const [debouncedAmount, setDebouncedAmount] = useState<string>(swapAmount);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAmount(swapAmount);
+    }, 200); // debounce delay should be enough to not calculate every keystroke, but still be responsive (read Doherty Threshold)
+    return () => clearTimeout(timer);
+  }, [swapAmount]);
 
   const {
     data: poolData,
@@ -118,17 +126,17 @@ function Index() {
     },
   });
 
-  const calculateSwapEstimate = () => {
+  const calculateSwapEstimate = useMemo(() => {
     if (!poolData) return { estimate: 0, fee: 0 };
 
-    const amount = parseFloat(swapAmount) || 0;
+    const amount = parseFloat(debouncedAmount) || 0;
     const estimate = amount * poolData.token0Price;
     const fee = estimate * poolData.fee;
 
     return { estimate, fee };
-  };
+  }, [debouncedAmount, poolData]);
 
-  const { estimate: swapEstimate, fee: swapFee } = calculateSwapEstimate();
+  const { estimate: swapEstimate, fee: swapFee } = calculateSwapEstimate;
 
   const handleSwap = async (e: React.FormEvent) => {
     e.preventDefault();
